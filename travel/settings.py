@@ -37,8 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'cities'  # мы прописали наше приложение cities, теперь django знает о
+    'cities',  # мы прописали наше приложение cities, теперь django знает о
     #  нашем приложении
+    'trains',
 ]
 
 MIDDLEWARE = [
