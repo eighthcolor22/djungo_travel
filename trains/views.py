@@ -11,7 +11,7 @@ from django.contrib import messages
 
 def home(request):
     trains = Train.objects.all()  # сделали запросна получение всех записей из бызы данных
-    paginator = Paginator(trains, 2)  # t22
+    paginator = Paginator(trains, 10)  # t22
     page = request.GET.get('page')
     trains = paginator.get_page(page)
     return render(request, 'trains/home.html', {'object_list': trains})

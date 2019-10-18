@@ -23,7 +23,7 @@ def home(request):
 
     # https://docs.djangoproject.com/en/2.2/topics/pagination/
     cities = City.objects.all()  # сделали запросна получение всех записей из бызы данных
-    paginator = Paginator(cities, 2)  # t22
+    paginator = Paginator(cities, 10)  # t22
     page = request.GET.get('page')
     cities = paginator.get_page(page)
     return render(request, 'cities/home.html', {'object_list': cities})

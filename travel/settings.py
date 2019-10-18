@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'cities',  # мы прописали наше приложение cities, теперь django знает о
     #  нашем приложении
     'trains',
+    'routes',
 ]
 
 MIDDLEWARE = [
