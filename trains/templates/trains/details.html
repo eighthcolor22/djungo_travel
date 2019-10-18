@@ -3,7 +3,7 @@
 {% block title%}Поезд{% endblock%}
 
 {% block content%}
-    <h1 class="display-4">Город</h1>
+    <h1 class="display-4">Поезд</h1>
     <div class="row">
         <div class="col-md-6">
                         <table class="table table-striped">
@@ -41,14 +41,14 @@
 
                     </td>
                     <td>
-                        <a href='{% url "train:update" %}'>
+                        <a href='{% url "train:update" pk=object.pk %}'>
                            <button type="button" class="btn btn-primary btn-sm">
                             Редактировать
                            </button>
                         </a>
                     </td>
                     <td>
-                        <a href='{% url "train:delete" %}'>
+                        <a href='{% url "train:delete" pk=object.pk %}'>
                            <button type="button" class="btn btn-warning btn-sm">
                             Удалить
                            </button>

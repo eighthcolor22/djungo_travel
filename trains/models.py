@@ -21,7 +21,7 @@ class Train(models.Model):
 
 # следующая функция проверяет записанный поезд на уникальность
     def clean(self, *args, **kwargs):
-        if self.from_city == self.to_city:  #  проверка на идентичность городов отпр и приб
+        if self.from_city == self.to_city:  # проверка на идентичность городов отпр и приб
             raise ValidationError('Измените город прибытия')
         # проверка на одинаковое время прибытия
         qs = Train.objects.filter(from_city=self.from_city,
