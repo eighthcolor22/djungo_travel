@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include  # добавили include, когда добавляли
 # начальную страницу приложения home
-from routes.views import home, find_routes
+from routes.views import home, find_routes, add_route
 
 
 urlpatterns = [
@@ -24,6 +24,7 @@ urlpatterns = [
     path('cities/', include(('cities.urls', 'city'))),
     path('trains/', include(('trains.urls', 'train'))),
     path('find/', find_routes, name='find_routes'),
+    path('add_route/', add_route, name='add_route'),
     path('', home, name='home'),
 
 

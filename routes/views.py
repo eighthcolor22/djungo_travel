@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib import messages
 from .forms import *
 from trains.models import Train
@@ -47,7 +47,8 @@ def find_routes(request):
             # assert False
             from_city = data['from_city']
 
-            # print('\n','from_city', from_city)
+            # print('\n','from_city', type(from_city))  # print('\n','from_city', from_city)
+            # print('\n', type(from_city.name))  # class 'str'
 
             to_city = data['to_city']
             across_cities_form = data['across_cities']  # получаем что-то в виде списка
@@ -103,8 +104,8 @@ def find_routes(request):
             tmp = {}
             tmp['trains'] = []
             total_time = 0
-            for index in range(len(route)-1):
-                qs = Train.objects.filter(from_city=route[index], to_city=route[index+1])  # запрос, возвращающий
+            for index in range(len(route) - 1):
+                qs = Train.objects.filter(from_city=route[index], to_city=route[index + 1])  # запрос, возвращающий
                 # поезда(с модели Train), выбранные по значениям из маршрутов
                 qs = qs.order_by('travel_time').first()  # конструкция фильтрует все значения поездов и
                 # возвращает с намиеньшим значение поля'travel_time'
@@ -119,20 +120,28 @@ def find_routes(request):
             messages.error(request, 'время в пути больше заданного')
             return render(request, 'routes/home.html', {'form': form})
 
+        print('\n', trains, '\n')
+
         routes = []
         cities = {'from_city': from_city.name, 'to_city': to_city.name}
+
+        # print('\n', cities, '\n')
+
         for tr in trains:
             routes.append({'route': tr['trains'],
                            'total_time': tr['total_time'],
                            'from_city': from_city.name,
                            'to_city': to_city.name
                            })
+            print('\n', routes, '\n')
 
+        # сортируем маршруты под продолжительности поездки
         sorted_routes = []
         if len(routes) == 1:
             sorted_routes = routes
         else:
-            times = list(set(x['total_time'] for x in routes))
+            times = list(set(x['total_time'] for x in routes))  # вытаскиваем временя маршрутов
+            print('\n', times, '\n')
             times = sorted(times)
             for time in times:
                 for route in routes:
@@ -147,8 +156,59 @@ def find_routes(request):
         context['cities'] = cities
         return render(request, 'routes/home.html', context)
 
-        # return render(request, 'routes/home.html', {'form': form})
     else:
         messages.error(request, 'Создайте маршрут')
         form = RouteForm()
         return render(request, 'routes/home.html', {'form': form})
+
+
+def add_route(request):  # функция отображения сохранения маршрута
+    if request.method == "POST":  # отрабатывает при нажатии на кнопку "сохранить"
+        form = RouteModelForm(request.POST or None)
+        if form.is_valid():
+            data = form.cleaned_data
+            name = data['name']
+            travel_times = data['travel_times']
+            from_city = data['from_city']
+            to_city = data['to_city']
+            across_cities = data['across_cities'].split(' ')
+            trains = [int(x) for x in across_cities if x.isalnum()]
+            qs = Train.objects.filter(id__in=trains)
+
+            route = Route(name=name, from_city=from_city,
+                          to_city=to_city, travel_times=travel_times)
+            route.save()
+            for tr in qs:
+                route.across_cities.add(tr.id)
+            messages.success(request, 'Маршрут был успешно сохранен.')
+            return redirect('/')
+    else:
+        data = request.GET
+        if data:
+            travel_times = data['travel_times']
+            from_city = data['from_city']
+            to_city = data['to_city']
+            across_cities = data['across_cities'].split(' ')
+            trains = [int(x) for x in across_cities if x.isalnum()]
+            qs = Train.objects.filter(id__in=trains)
+            train_list = ' '.join(str(i) for i in trains)
+            form = RouteModelForm(initial={'from_city': from_city,
+                                           'to_city': to_city,
+                                           'travel_times': travel_times,
+                                           'across_cities': train_list})
+            route_desc = []
+            # передаем описательную часть
+            for tr in qs:
+                dsc = 'Поезд №{} следующий из г. {} в г. {}. Время в пути {} часа'.format(tr.name,
+                                                                                  tr.from_city,
+                                                                                  tr.to_city,
+                                                                                  tr.travel_time)
+                route_desc.append(dsc)
+            print('\n', route_desc, '\n')
+            context = {'form': form, 'descr': route_desc,
+                       'from_city': from_city, 'to_city': to_city,
+                       'travel_times': travel_times}
+            return render(request, 'routes/create.html', context)
+        else:
+            messages.error(request, 'Невозможно сохранить несуществующий маршрут')
+            return redirect('/')
