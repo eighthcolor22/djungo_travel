@@ -1,7 +1,12 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
+from django.views.generic.detail import DetailView
+from django.views.generic.edit import DeleteView
+from django.views.generic.list import ListView
+from django.urls import reverse_lazy
 from .forms import *
 from trains.models import Train
+
 
 
 def home(request):
@@ -120,20 +125,20 @@ def find_routes(request):
             messages.error(request, 'время в пути больше заданного')
             return render(request, 'routes/home.html', {'form': form})
 
-        print('\n', trains, '\n')
+        # print('\n', trains, '\n')
 
         routes = []
-        cities = {'from_city': from_city.name, 'to_city': to_city.name}
+        cities = {'from_city': from_city.name, 'to_city': to_city.name}  # параметры для отображения на странице
 
         # print('\n', cities, '\n')
-
+        # преобразовываем полученный список trains  в более удобный вид
         for tr in trains:
             routes.append({'route': tr['trains'],
                            'total_time': tr['total_time'],
                            'from_city': from_city.name,
                            'to_city': to_city.name
                            })
-            print('\n', routes, '\n')
+            # print('\n', routes, '\n')
 
         # сортируем маршруты под продолжительности поездки
         sorted_routes = []
@@ -141,7 +146,7 @@ def find_routes(request):
             sorted_routes = routes
         else:
             times = list(set(x['total_time'] for x in routes))  # вытаскиваем временя маршрутов
-            print('\n', times, '\n')
+            # print('\n', times, '\n')
             times = sorted(times)
             for time in times:
                 for route in routes:
@@ -212,3 +217,25 @@ def add_route(request):  # функция отображения сохране�
         else:
             messages.error(request, 'Невозможно сохранить несуществующий маршрут')
             return redirect('/')
+
+
+class RouteDetailView(DetailView):
+    queryset = Route.objects.all()
+    context_object_name = 'object'
+    template_name = 'routes/detail.html'
+
+
+class RouteListView(ListView):
+    queryset = Route.objects.all()
+    context_object_name = 'object_list'
+    template_name = 'routes/list.html'
+
+
+class RouteDeleteView(DeleteView):  # t20 класс создания новой записи в б/д
+    model = Route
+    # template_name = 'cities/delete.html'  # Запускаем страницу удаления c подтверждением
+    success_url = reverse_lazy('home')
+
+    def get(self, request, *args, **kwargs):  # удаляем без страницы подтверждения
+        messages.success(request, 'Маршрут успешно удален')
+        return self.post(request, *args, **kwargs)
