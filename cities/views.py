@@ -5,6 +5,7 @@ from django.core.paginator import Paginator  # t22
 from django.urls import reverse_lazy
 from django.contrib.messages.views import SuccessMessageMixin  # t23
 from django.contrib import messages  # t23
+from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import City  # импортируем нашу модель с .models
 # from .forms import HtmlForm  # t18
 from .forms import CityForm  # t19
@@ -44,7 +45,8 @@ class CityDetailView(DetailView):
     #     return res
 
 
-class CityCreateView(SuccessMessageMixin, CreateView):  # t19 класс создания новой записи в б/д
+class CityCreateView(SuccessMessageMixin,LoginRequiredMixin, CreateView):  # t19 класс создания новой записи в б/д
+    login_url = '/login/'
     model = City
     form_class = CityForm
     template_name = 'cities/create.html'
@@ -53,7 +55,8 @@ class CityCreateView(SuccessMessageMixin, CreateView):  # t19 класс соз�
     # в случае успешного выполнения
 
 
-class CityUpdateView(SuccessMessageMixin, UpdateView):  # t20 класс создания новой записи в б/д
+class CityUpdateView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):  # t20 класс создания новой записи в б/д
+    login_url = '/login/'
     model = City
     form_class = CityForm
     template_name = 'cities/update.html'
@@ -61,7 +64,8 @@ class CityUpdateView(SuccessMessageMixin, UpdateView):  # t20 класс соз�
     success_message = "Город успешно отредактирован"
 
 
-class CityDeleteView(DeleteView):  # t20 класс создания новой записи в б/д
+class CityDeleteView(LoginRequiredMixin, DeleteView):  # t20 класс создания новой записи в б/д
+    login_url = '/login/'
     model = City
     # template_name = 'cities/delete.html'  # Запускаем страницу удаления c подтверждением
     success_url = reverse_lazy('city:home')

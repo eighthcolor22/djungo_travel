@@ -4,9 +4,9 @@ from django.views.generic.detail import DetailView
 from django.views.generic.edit import DeleteView
 from django.views.generic.list import ListView
 from django.urls import reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin
 from .forms import *
 from trains.models import Train
-
 
 
 def home(request):
@@ -231,10 +231,11 @@ class RouteListView(ListView):
     template_name = 'routes/list.html'
 
 
-class RouteDeleteView(DeleteView):  # t20 класс создания новой записи в б/д
+class RouteDeleteView(LoginRequiredMixin, DeleteView):  # t20 класс создания новой записи в б/д
     model = Route
     # template_name = 'cities/delete.html'  # Запускаем страницу удаления c подтверждением
     success_url = reverse_lazy('home')
+    login_url = '/login/'
 
     def get(self, request, *args, **kwargs):  # удаляем без страницы подтверждения
         messages.success(request, 'Маршрут успешно удален')

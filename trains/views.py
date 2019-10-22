@@ -4,10 +4,10 @@ from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.contrib.messages.views import SuccessMessageMixin  # t23
 from django.core.paginator import Paginator
-from .forms import TrainForm
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.contrib import messages
-
+from .forms import TrainForm
 
 def home(request):
     trains = Train.objects.all()  # сделали запросна получение всех записей из бызы данных
@@ -25,7 +25,8 @@ class TrainDetailView(DetailView):
     template_name = 'trains/details.html'  # адрес нашего шаблона
 
 
-class TrainCreateView(SuccessMessageMixin, CreateView):  # t19 класс создания новой записи в б/д
+class TrainCreateView(SuccessMessageMixin, LoginRequiredMixin, CreateView):  # t19 класс создания новой записи в б/д
+    login_url = '/login/'
     model = Train
     form_class = TrainForm
     template_name = 'trains/create.html'
@@ -33,7 +34,8 @@ class TrainCreateView(SuccessMessageMixin, CreateView):  # t19 класс соз
     success_message = "поезд успешно создан!"
 
 
-class TrainUpdateView(SuccessMessageMixin, UpdateView):  # t20 класс создания новой записи в б/д
+class TrainUpdateView(SuccessMessageMixin, LoginRequiredMixin, UpdateView):  # t20 класс создания новой записи в б/д
+    login_url = '/login/'
     model = Train
     form_class = TrainForm
     template_name = 'trains/update.html'
@@ -41,7 +43,8 @@ class TrainUpdateView(SuccessMessageMixin, UpdateView):  # t20 класс соз
     success_message = "Поезд успешно отредактирован"
 
 
-class TrainDeleteView(DeleteView):  # t20 класс создания новой записи в б/д
+class TrainDeleteView(LoginRequiredMixin, DeleteView):  # t20 класс создания новой записи в б/д
+    login_url = '/login/'
     model = Train
     success_url = reverse_lazy('train:home')
 
